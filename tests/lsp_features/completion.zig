@@ -360,7 +360,7 @@ test "generic function" {
     });
 }
 
-test "recusive generic function" {
+test "recursive generic function" {
     try testCompletion(
         \\const S = struct { alpha: u32 };
         \\fn ArrayList(comptime T: type) type {
@@ -2460,7 +2460,7 @@ test "anytype resolution based on callsite-references" {
     });
 }
 
-test "builtin fn `field`" {
+test "@field" {
     try testCompletion(
         \\pub const chip_mod = struct {
         \\    pub const devices = struct {
@@ -2478,7 +2478,24 @@ test "builtin fn `field`" {
     });
 }
 
-test "completion - builtin fns return type" {
+test "@FieldType" {
+    try testCompletion(
+        \\test {
+        \\    const Foo = struct {
+        \\        alpha: u32,
+        \\    };
+        \\    const Bar = struct {
+        \\        beta: Foo,
+        \\    };
+        \\    const foo: @FieldType(Bar, "beta") = undefined;
+        \\    foo.<cursor>
+        \\}
+    , &.{
+        .{ .label = "alpha", .kind = .Field, .detail = "u32" },
+    });
+}
+
+test "builtin fns return type" {
     try testCompletion(
         \\pub const chip_mod = struct {
         \\    pub const devices = struct {
@@ -2557,7 +2574,7 @@ test "completion - builtin fns return type" {
     });
 }
 
-test "completion - builtin fns taking an enum arg" {
+test "builtin fns taking an enum arg" {
     try testCompletion(
         \\test {
         \\    @Type(.{.<cursor>
@@ -2714,9 +2731,9 @@ test "completion - builtin fns taking an enum arg" {
     });
     try testCompletionTextEdit(.{
         .source = "fn foo() callconv(.<cursor>",
-        .label = "AAPCS",
-        .expected_insert_line = "fn foo() callconv(.AAPCS",
-        .expected_replace_line = "fn foo() callconv(.AAPCS",
+        .label = "arm_aapcs",
+        .expected_insert_line = "fn foo() callconv(.{ .arm_aapcs = ",
+        .expected_replace_line = "fn foo() callconv(.{ .arm_aapcs = ",
     });
 }
 
